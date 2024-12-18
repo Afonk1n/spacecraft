@@ -63,12 +63,26 @@
         >
           РЕСТАРТ
         </button>
+        <button 
+          class="menu-btn" 
+          @click="showConfirmMenu"
+        >
+          МЕНЮ
+        </button>
       </div>
     </div>
+
+    <ConfirmModal
+      v-if="showConfirmModal"
+      @confirm="confirmReturn"
+      @close="closeConfirmModal"
+    />
   </div>
 </template>
 
 <script>
+import ConfirmModal from './ConfirmModal.vue'
+
 export default {
   name: 'GameField',
   props: {
@@ -76,6 +90,9 @@ export default {
       type: String,
       required: true
     }
+  },
+  components: {
+    ConfirmModal
   },
   data() {
     return {
@@ -91,7 +108,8 @@ export default {
       gravity: 1.4,
       thrustPower: 4.0,
       isGameOver: false,
-      isExploded: false
+      isExploded: false,
+      showConfirmModal: false
     }
   },
   computed: {
@@ -172,20 +190,21 @@ export default {
       
       const success = this.currentSpeed < 5;
       if (success) {
+        this.$emit('game-completed', {
+          time: this.time,
+          fuel: this.fuel,
+          speed: this.currentSpeed,
+          success: true
+        });
+      } else {
+        this.isExploded = true;
         setTimeout(() => {
-          alert('УСПЕШНАЯ ПОСАДКА!');
           this.$emit('game-completed', {
             time: this.time,
             fuel: this.fuel,
             speed: this.currentSpeed,
-            success: true
+            success: false
           });
-        }, 100);
-      } else {
-        this.isExploded = true;
-        setTimeout(() => {
-          alert('КРУШЕНИЕ! СКОРОСТЬ СЛИШКОМ ВЫСОКАЯ!');
-          this.restartGame();
         }, 1500);
       }
     },
@@ -222,6 +241,22 @@ export default {
       if (e.code === 'Space') {
         this.stopThrust();
       }
+    },
+    showConfirmMenu() {
+      if (this.isPaused || this.isGameOver) {
+        this.$emit('return-to-menu');
+      } else {
+        this.isPaused = true;
+        this.showConfirmModal = true;
+      }
+    },
+    confirmReturn() {
+      this.showConfirmModal = false;
+      this.$emit('return-to-menu');
+    },
+    closeConfirmModal() {
+      this.showConfirmModal = false;
+      this.isPaused = false;
     }
   },
   mounted() {

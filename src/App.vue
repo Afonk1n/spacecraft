@@ -2,23 +2,21 @@
   <div class="app">
     <NicknameScreen 
       v-if="currentScreen === 'nickname'"
-      @nickname-submitted="setNickname"
+      @nickname-selected="setNickname"
     />
     <WelcomeScreen 
-      v-else-if="currentScreen === 'menu'"
-      :nickname="playerNickname"
+      v-if="currentScreen === 'menu'"
       @start-game="startGame"
       @show-leaderboard="showLeaderboard"
     />
     <GameField 
-      v-else-if="currentScreen === 'game'"
-      :playerNickname="playerNickname"
+      v-if="currentScreen === 'game'"
       @game-completed="handleGameOver"
-      @back-to-menu="currentScreen = 'menu'"
+      @return-to-menu="returnToMenu"
     />
     <LeaderBoard 
-      v-else-if="currentScreen === 'leaderboard'"
-      @back-to-menu="currentScreen = 'menu'"
+      v-if="showLeaderboardModal"
+      @close="closeLeaderboard"
     />
   </div>
 </template>
@@ -40,7 +38,8 @@ export default {
   data() {
     return {
       currentScreen: 'nickname',
-      playerNickname: ''
+      playerNickname: '',
+      showLeaderboardModal: false
     }
   },
   methods: {
@@ -50,13 +49,17 @@ export default {
     },
     startGame() {
       this.currentScreen = 'game';
+      this.showLeaderboardModal = false;
     },
     showLeaderboard() {
-      this.currentScreen = 'leaderboard';
+      this.showLeaderboardModal = true;
+    },
+    closeLeaderboard() {
+      this.showLeaderboardModal = false;
     },
     async handleGameOver(gameData) {
       try {
-        const response = await fetch('http://localhost:3000/api/scores', {
+        await fetch('http://localhost:3000/api/scores', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -70,73 +73,33 @@ export default {
           })
         });
         
-        if (response.ok) {
-          this.currentScreen = 'leaderboard';
-        }
+        this.showLeaderboardModal = true;
+        
       } catch (error) {
         console.error('Ошибка сохранения результата:', error);
       }
+    },
+    returnToMenu() {
+      this.currentScreen = 'menu';
+      this.showLeaderboardModal = false;
     }
   }
 }
 </script>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-
-* {
+.app {
+  height: 100vh;
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
+  font-family: 'Press Start 2P', cursive;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
   margin: 0;
   padding: 0;
-  min-height: 100vh;
-  min-height: -webkit-fill-available;
-  background-color: #000;
-  font-family: 'Press Start 2P', cursive;
-  image-rendering: pixelated;
-}
-
-.app {
-  width: 960px;
-  height: 600px;
-  margin: 0 auto;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: #000;
   overflow: hidden;
-  border: 4px solid #444;
-  box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
-}
-
-@media (max-width: 768px) {
-  .app {
-    width: 100vw;
-    height: 100vh;
-    max-width: 100%;
-    border: none;
-    transform: none;
-    top: 0;
-    left: 0;
-  }
-}
-
-/* Добавим медиа-запрос для планшетов в альбомной ориентации */
-@media (min-width: 769px) and (max-height: 600px) {
-  .app {
-    width: auto;
-    height: 90vh;
-    aspect-ratio: 16/10;
-  }
-}
-
-/* Фикс для мобильных Safari */
-html {
-  height: -webkit-fill-available;
 }
 </style>

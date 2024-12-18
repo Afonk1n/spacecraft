@@ -1,29 +1,33 @@
 <template>
-  <div class="leaderboard">
-    <h1 class="leaderboard-title">ТАБЛИЦА ЛИДЕРОВ</h1>
-    <div class="scores-container">
-      <table class="scores-table">
-        <thead>
-          <tr>
-            <th>МЕСТО</th>
-            <th>ПОЗЫВНОЙ</th>
-            <th>ВРЕМЯ</th>
-            <th>ТОПЛИВО</th>
-            <th>СКОРОСТЬ</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(score, index) in scores" :key="index">
-            <td>{{ index + 1 }}</td>
-            <td>{{ score.nickname }}</td>
-            <td>{{ formatTime(score.time) }}</td>
-            <td>{{ Math.round(score.fuel) }}</td>
-            <td>{{ score.speed.toFixed(1) }} м/с</td>
-          </tr>
-        </tbody>
-      </table>
+  <div class="modal-overlay" @click.self="$emit('close')">
+    <div class="modal-content">
+      <button class="close-button" @click="$emit('close')">×</button>
+      <div class="leaderboard">
+        <h2 class="leaderboard-title">Таблица лидеров</h2>
+        <div class="scores-container">
+          <table class="scores-table">
+            <thead>
+              <tr>
+                <th>МЕСТО</th>
+                <th>ПОЗЫВНОЙ</th>
+                <th>ВРЕМЯ</th>
+                <th>ТОПЛИВО</th>
+                <th>СКОРОСТЬ</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(score, index) in scores" :key="index">
+                <td>{{ index + 1 }}</td>
+                <td>{{ score.nickname }}</td>
+                <td>{{ formatTime(score.time) }}</td>
+                <td>{{ Math.round(score.fuel) }}</td>
+                <td>{{ score.speed.toFixed(1) }} м/с</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
-    <button class="back-button" @click="$emit('back-to-menu')">ВЕРНУТЬСЯ В МЕНЮ</button>
   </div>
 </template>
 
@@ -58,6 +62,53 @@ export default {
 </script>
 
 <style scoped>
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  position: relative;
+  width: 80%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: linear-gradient(rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.9)),
+              url('../assets/stars.png');
+  border: 2px solid #0f0;
+  padding: 20px;
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 30px;
+  height: 30px;
+  border: 2px solid #0f0;
+  background: transparent;
+  color: #0f0;
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+}
+
+.close-button:hover {
+  background: #0f0;
+  color: #000;
+}
+
 .leaderboard {
   height: 100%;
   display: flex;
